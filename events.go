@@ -55,17 +55,14 @@ func (el *EventListener) onMessageCreate(_ *discordgo.Session, m *discordgo.Mess
 		authorID = m.Author.ID
 	}
 
-	el.server.SendNotification("notifications/event", map[string]any{
-		"type": "discord.message_received",
-		"data": map[string]any{
-			"message_id": m.ID,
-			"channel_id": m.ChannelID,
-			"guild_id":   m.GuildID,
-			"author":     authorName,
-			"author_id":  authorID,
-			"content":    m.Content,
-			"timestamp":  formatTimestamp(m.Timestamp),
-		},
+	el.server.SendNotification("discord/message_received", map[string]any{
+		"message_id": m.ID,
+		"channel_id": m.ChannelID,
+		"guild_id":   m.GuildID,
+		"author":     authorName,
+		"author_id":  authorID,
+		"content":    m.Content,
+		"timestamp":  formatTimestamp(m.Timestamp),
 	})
 }
 
@@ -82,16 +79,14 @@ func (el *EventListener) handleDMMessage(m *discordgo.MessageCreate) {
 
 	// Already-verified user — forward the DM content.
 	if el.server.IsUserVerified(userID) {
-		el.server.SendNotification("notifications/event", map[string]any{
-			"type": "discord.dm_message_received",
-			"data": map[string]any{
-				"message_id": m.ID,
-				"channel_id": m.ChannelID,
-				"user_id":    userID,
-				"user_name":  userName,
-				"content":    m.Content,
-				"timestamp":  formatTimestamp(m.Timestamp),
-			},
+		el.server.SendNotification("discord/dm_message_received", map[string]any{
+			"message_id": m.ID,
+			"channel_id": m.ChannelID,
+			"user_id":    userID,
+			"author":     userName,
+			"content":    m.Content,
+			"is_dm":      true,
+			"timestamp":  formatTimestamp(m.Timestamp),
 		})
 		return
 	}
@@ -115,14 +110,12 @@ func (el *EventListener) handleDMMessage(m *discordgo.MessageCreate) {
 
 	el.logger.Info("DM verification challenge sent", "user_id", userID, "user_name", userName)
 
-	el.server.SendNotification("notifications/event", map[string]any{
-		"type": "discord.dm_verification_requested",
-		"data": map[string]any{
-			"user_id":    userID,
-			"user_name":  userName,
-			"auth_key":   authKey,
-			"channel_id": m.ChannelID,
-		},
+	el.server.SendNotification("discord/dm_verification_requested", map[string]any{
+		"user_id":    userID,
+		"author":     userName,
+		"auth_key":   authKey,
+		"channel_id": m.ChannelID,
+		"is_dm":      true,
 	})
 }
 
@@ -136,15 +129,12 @@ func (el *EventListener) onMessageReactionAdd(_ *discordgo.Session, r *discordgo
 		emoji = r.Emoji.Name + ":" + r.Emoji.ID
 	}
 
-	el.server.SendNotification("notifications/event", map[string]any{
-		"type": "discord.reaction_added",
-		"data": map[string]any{
-			"message_id": r.MessageID,
-			"channel_id": r.ChannelID,
-			"guild_id":   r.GuildID,
-			"user_id":    r.UserID,
-			"emoji":      emoji,
-		},
+	el.server.SendNotification("discord/reaction_added", map[string]any{
+		"message_id": r.MessageID,
+		"channel_id": r.ChannelID,
+		"guild_id":   r.GuildID,
+		"user_id":    r.UserID,
+		"emoji":      emoji,
 	})
 }
 
@@ -156,12 +146,9 @@ func (el *EventListener) onGuildMemberAdd(_ *discordgo.Session, m *discordgo.Gui
 		userID = m.User.ID
 	}
 
-	el.server.SendNotification("notifications/event", map[string]any{
-		"type": "discord.member_joined",
-		"data": map[string]any{
-			"guild_id": m.GuildID,
-			"user":     userName,
-			"user_id":  userID,
-		},
+	el.server.SendNotification("discord/member_joined", map[string]any{
+		"guild_id": m.GuildID,
+		"author":   userName,
+		"user_id":  userID,
 	})
 }

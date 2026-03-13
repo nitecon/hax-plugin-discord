@@ -464,12 +464,10 @@ func (s *Server) tryOwnerVerification() {
 
 	if !s.ValidateVerification(ownerID, authKey) {
 		s.logger.Warn("owner verification failed", "owner_id", ownerID)
-		s.SendNotification("notifications/event", map[string]any{
-			"type": "discord.dm_verification_failed",
-			"data": map[string]any{
-				"user_id": ownerID,
-				"reason":  "invalid or expired verification key",
-			},
+		s.SendNotification("discord/dm_verification_failed", map[string]any{
+			"user_id": ownerID,
+			"reason":  "invalid or expired verification key",
+			"is_dm":   true,
 		})
 		return
 	}
@@ -488,11 +486,9 @@ func (s *Server) tryOwnerVerification() {
 		}
 	}
 
-	s.SendNotification("notifications/event", map[string]any{
-		"type": "discord.dm_verification_completed",
-		"data": map[string]any{
-			"user_id": ownerID,
-		},
+	s.SendNotification("discord/dm_verification_completed", map[string]any{
+		"user_id": ownerID,
+		"is_dm":   true,
 	})
 
 	// Clear so it doesn't re-trigger.

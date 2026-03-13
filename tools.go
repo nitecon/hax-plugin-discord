@@ -274,13 +274,10 @@ func (s *Server) toolPollChannels(_ context.Context, _ json.RawMessage) (*ToolRe
 			if time.Since(m.Timestamp) < 60*time.Second {
 				authorName, authorID := "unknown", ""
 				if m.Author != nil { authorName = m.Author.Username; authorID = m.Author.ID }
-				s.SendNotification("notifications/event", map[string]any{
-					"type": "discord.message_received",
-					"data": map[string]any{
-						"message_id": m.ID, "channel_id": m.ChannelID, "guild_id": m.GuildID,
-						"author": authorName, "author_id": authorID, "content": m.Content,
-						"timestamp": formatTimestamp(m.Timestamp), "source": "poll",
-					},
+				s.SendNotification("discord/message_received", map[string]any{
+					"message_id": m.ID, "channel_id": m.ChannelID, "guild_id": m.GuildID,
+					"author": authorName, "author_id": authorID, "content": m.Content,
+					"timestamp": formatTimestamp(m.Timestamp), "source": "poll",
 				})
 			}
 		}
